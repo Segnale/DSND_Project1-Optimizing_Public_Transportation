@@ -19,7 +19,7 @@ class Station(Producer):
     #
     # TODO: Define this value schema in `schemas/station_value.json, then uncomment the below
     #
-    #value_schema = avro.load(f"{Path(__file__).parents[0]}/schemas/arrival_value.json")
+    value_schema = avro.load(f"{Path(__file__).parents[0]}/schemas/arrival_value.json")
 
     def __init__(self, station_id, name, color, direction_a=None, direction_b=None):
         self.name = name
@@ -41,7 +41,7 @@ class Station(Producer):
         super().__init__(
             topic_name,
             key_schema=Station.key_schema,
-            # TODO: value_schema=Station.value_schema, # TODO: Uncomment once schema is defined
+            value_schema=Station.value_schema, # TODO: Uncomment once schema is defined
             # TODO: num_partitions=???,
             # TODO: num_replicas=???,
         )
@@ -63,17 +63,17 @@ class Station(Producer):
         #
         #
         logger.info("arrival kafka integration incomplete - skipping")
-        #self.producer.produce(
-        #    topic=self.topic_name,
-        #    key={"timestamp": self.time_millis()},
-        #    value={
+        self.producer.produce(
+            topic=self.topic_name,
+            key={"timestamp": self.time_millis()},
+            value={
         #        #
         #        #
         #        # TODO: Configure this
         #        #
         #        #
-        #    },
-        #)
+            },
+        )
 
     def __str__(self):
         return "Station | {:^5} | {:<30} | Direction A: | {:^5} | departing to {:<30} | Direction B: | {:^5} | departing to {:<30} | ".format(

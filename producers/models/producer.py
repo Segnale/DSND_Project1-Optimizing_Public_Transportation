@@ -5,10 +5,12 @@ import time
 
 from confluent_kafka import avro
 from confluent_kafka.admin import AdminClient, NewTopic
-from confluent_kafka.avro import AvroProducer
+from confluent_kafka.avro import AvroProducer, CachedSchemaRegistryClient
 
 logger = logging.getLogger(__name__)
 
+SCHEMA_REGISTRY_URL = "http://schema-registry:8081/"
+BROKER_URL = "PLAINTEXT://kafka0:9092"
 
 class Producer:
     """Defines and provides common functionality amongst Producers"""
@@ -38,9 +40,9 @@ class Producer:
         #
         #
         self.broker_properties = {
-            # TODO
-            # TODO
-            # TODO
+            broker.id = 1,
+            listeners = BROKER_URL,
+            log.dirs = tmp/kafka-log-1
         }
 
         # If the topic does not already exist, try to create it
@@ -49,8 +51,10 @@ class Producer:
             Producer.existing_topics.add(self.topic_name)
 
         # TODO: Configure the AvroProducer
-        # self.producer = AvroProducer(
-        # )
+        self.producer = AvroProducer(
+            {"bootstrap.servers": BROKER_URL,
+            schema_registry = key_schema}
+        )
 
     def create_topic(self):
         """Creates the producer topic if it does not already exist"""
@@ -58,6 +62,16 @@ class Producer:
         #
         # TODO: Write code that creates the topic for this producer if it does not already exist on
         # the Kafka Broker.
+        NewTopic{
+            topic = self.topic_name,
+            num_partitions = self.num_partitions,
+            num_replication_factor = self.num_replicas,
+            config = {
+                "cleanup.policy": "compact",
+                "delete.retention.ms": 1000,
+                "compression.type": "lz4"
+            }
+        }
         #
         #
         logger.info("topic creation kafka integration incomplete - skipping")

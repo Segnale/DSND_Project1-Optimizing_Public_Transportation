@@ -17,9 +17,7 @@ class Turnstile(Producer):
     #
     # TODO: Define this value schema in `schemas/turnstile_value.json, then uncomment the below
     #
-    #value_schema = avro.load(
-    #    f"{Path(__file__).parents[0]}/schemas/turnstile_value.json"
-    #)
+    value_schema = avro.load(f"{Path(__file__).parents[0]}/schemas/turnstile_value.json")
 
     def __init__(self, station):
         """Create the Turnstile"""
