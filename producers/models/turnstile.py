@@ -31,16 +31,16 @@ class Turnstile(Producer):
 
         #
         #
-        # TODO: Complete the below by deciding on a topic name, number of partitions, and number of
+        # DONE: Complete the below by deciding on a topic name, number of partitions, and number of
         # replicas
         #
         #
         super().__init__(
-            f"{station_name}", # TODO: Come up with a better topic name
+            f"il.cta.{station_name}.turnstile", # DONE: Come up with a better topic name
             key_schema=Turnstile.key_schema,
-            # TODO: value_schema=Turnstile.value_schema, TODO: Uncomment once schema is defined
-            # TODO: num_partitions=???,
-            # TODO: num_replicas=???,
+            value_schema=Turnstile.value_schema, # DONE: Uncomment once schema is defined
+            num_partitions=3,
+            num_replicas=1,
         )
         self.station = station
         self.turnstile_hardware = TurnstileHardware(station)
@@ -55,3 +55,18 @@ class Turnstile(Producer):
         # of entries that were calculated
         #
         #
+        Key = {
+            "timestamp": timestamp 
+        }
+        Values = {
+            "station.id": self.station,
+            "station_name": self.station,
+            "line": ""
+        }
+        self.producer(
+            topic = self.topic_name,
+            key = Key,
+            key_schema = key_schema,
+            value = Values,
+            value_schema = value_schema
+        )

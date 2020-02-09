@@ -17,7 +17,7 @@ class Station(Producer):
     key_schema = avro.load(f"{Path(__file__).parents[0]}/schemas/arrival_key.json")
 
     #
-    # TODO: Define this value schema in `schemas/station_value.json, then uncomment the below
+    # DONE: Define this value schema in `schemas/station_value.json, then uncomment the below
     #
     value_schema = avro.load(f"{Path(__file__).parents[0]}/schemas/arrival_value.json")
 
@@ -37,13 +37,13 @@ class Station(Producer):
         # replicas
         #
         #
-        topic_name = f"{station_name}" # TODO: Come up with a better topic name
+        topic_name = f"il.cta.{station_name}" # DONE: Come up with a better topic name
         super().__init__(
             topic_name,
             key_schema=Station.key_schema,
-            value_schema=Station.value_schema, # TODO: Uncomment once schema is defined
-            # TODO: num_partitions=???,
-            # TODO: num_replicas=???,
+            value_schema=Station.value_schema, # DONE: Uncomment once schema is defined
+            num_partitions=3,
+            num_replicas=1,
         )
 
         self.station_id = int(station_id)
@@ -63,15 +63,18 @@ class Station(Producer):
         #
         #
         logger.info("arrival kafka integration incomplete - skipping")
-        self.producer.produce(
+        self.producer(
             topic=self.topic_name,
             key={"timestamp": self.time_millis()},
             value={
+        #        # DONE: Configure this
         #        #
-        #        #
-        #        # TODO: Configure this
-        #        #
-        #        #
+                "station_id": self.station_id,
+                "train_id": train,
+                "direction": direction,
+                "line": self.color,
+                "prev_station_id": prev_station_id,
+                "prev_direction": prev_direction
             },
         )
 

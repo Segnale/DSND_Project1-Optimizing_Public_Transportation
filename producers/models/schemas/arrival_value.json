@@ -1,3 +1,13 @@
 {
-  "TODO": "Complete this Schema! (Make sure to delete this Key/Value Pair!"
+  "namespace": "il.sta",
+  "type": "record",
+  "name": "arrival.value",
+  "fields": [
+    {"name": "station_id", "type": "int"},
+    {"name": "train_id", "type": "int"},
+    {"name": "direction", "type": "string"},
+    {"name": "line", "type": "string"},
+    {"name": "prev_station_id", "type": "int"},
+    {"name": "prev_direction", "type": "string"}
+  ]
 }

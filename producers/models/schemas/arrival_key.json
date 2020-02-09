@@ -1,5 +1,5 @@
 {
-  "namespace": "com.udacity",
+  "namespace": "il.sta",
   "type": "record",
   "name": "arrival.key",
   "fields": [

@@ -10,7 +10,7 @@ from confluent_kafka.avro import AvroProducer, CachedSchemaRegistryClient
 logger = logging.getLogger(__name__)
 
 SCHEMA_REGISTRY_URL = "http://schema-registry:8081/"
-BROKER_URL = "PLAINTEXT://kafka0:9092"
+BROKER_URL = "PLAINTEXT://kafka0:9092,PLAINTEXT://kafka1:9093,PLAINTEXT://kafka2:9094"
 
 class Producer:
     """Defines and provides common functionality amongst Producers"""
@@ -32,52 +32,62 @@ class Producer:
         self.value_schema = value_schema
         self.num_partitions = num_partitions
         self.num_replicas = num_replicas
-
         #
         #
         # TODO: Configure the broker properties below. Make sure to reference the project README
         # and use the Host URL for Kafka and Schema Registry!
-        #
-        #
         self.broker_properties = {
-            broker.id = 1,
-            listeners = BROKER_URL,
-            log.dirs = tmp/kafka-log-1
+            "URL1": "PLAINTEXT://kafka0:9092",
+            "URL2": "PLAINTEXT://kafka0:9093",
+            "URL3": "PLAINTEXT://kafka0:9094"
         }
-
+        
         # If the topic does not already exist, try to create it
         if self.topic_name not in Producer.existing_topics:
             self.create_topic()
             Producer.existing_topics.add(self.topic_name)
+        
+        # Schema Registry for Avro
+        schema_registry = CachedSchemaRegistryClient(SCHEMA_REGISTRY_URL)
 
-        # TODO: Configure the AvroProducer
+        # DONE: Configure the AvroProducer
         self.producer = AvroProducer(
-            {"bootstrap.servers": BROKER_URL,
-            schema_registry = key_schema}
+            {"bootstrap.servers": self.broker_properties["URL1"]},
+            {schema_registry = schema_registry}
         )
 
     def create_topic(self):
         """Creates the producer topic if it does not already exist"""
         #
         #
-        # TODO: Write code that creates the topic for this producer if it does not already exist on
+        # DONE: Write code that creates the topic for this producer if it does not already exist on
         # the Kafka Broker.
-        NewTopic{
-            topic = self.topic_name,
-            num_partitions = self.num_partitions,
-            num_replication_factor = self.num_replicas,
-            config = {
-                "cleanup.policy": "compact",
-                "delete.retention.ms": 1000,
-                "compression.type": "lz4"
-            }
-        }
+        client = AdminClient({"bootstrap.servers": BROKER_URL})
+        features = client.create_topics(
+            [
+                NewTopic{
+                    topic = self.topic_name,
+                    num_partitions = self.num_partitions,
+                    num_replication_factor = self.num_replicas,
+                    config = {
+                        "cleanup.policy": "compact",
+                        "delete.retention.ms": 1000,
+                        "compression.type": "lz4"
+                    }
+                }
+            ]
+        )
         #
-        #
-        logger.info("topic creation kafka integration incomplete - skipping")
+        # Logging the result of the topic creation
+        for topic, feature in features.items():
+            try:
+                # Succesful topic creation
+                feature.result()
+                logger.info(f"topic {self.topic_name} created")
+            except Exception as e:
+                # Failing topic creation
+                logger.info(f"failed to create topic {self.topic_name}: {e}")
 
-    def time_millis(self):
-        return int(round(time.time() * 1000))
 
     def close(self):
         """Prepares the producer for exit by cleaning up the producer"""
