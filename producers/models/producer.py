@@ -10,7 +10,7 @@ from confluent_kafka.avro import AvroProducer, CachedSchemaRegistryClient
 logger = logging.getLogger(__name__)
 
 SCHEMA_REGISTRY_URL = "http://schema-registry:8081/"
-BROKER_URL = "PLAINTEXT://kafka0:9092,PLAINTEXT://kafka1:9093,PLAINTEXT://kafka2:9094"
+BROKER_URL = "PLAINTEXT://localhost:9092,PLAINTEXT://localhost:9093,PLAINTEXT://localhost:9094"
 
 class Producer:
     """Defines and provides common functionality amongst Producers"""
@@ -37,9 +37,9 @@ class Producer:
         # TODO: Configure the broker properties below. Make sure to reference the project README
         # and use the Host URL for Kafka and Schema Registry!
         self.broker_properties = {
-            "URL1": "PLAINTEXT://kafka0:9092",
-            "URL2": "PLAINTEXT://kafka0:9093",
-            "URL3": "PLAINTEXT://kafka0:9094"
+            "URL1": "PLAINTEXT://localhost:9092",
+            "URL2": "PLAINTEXT://localhost:9093",
+            "URL3": "PLAINTEXT://localhost:9094"
         }
         
         # If the topic does not already exist, try to create it
@@ -65,16 +65,16 @@ class Producer:
         client = AdminClient({"bootstrap.servers": BROKER_URL})
         features = client.create_topics(
             [
-                NewTopic{
+                NewTopic(
                     topic = self.topic_name,
                     num_partitions = self.num_partitions,
-                    num_replication_factor = self.num_replicas,
+                    replication_factor = self.num_replicas,
                     config = {
                         "cleanup.policy": "compact",
                         "delete.retention.ms": 1000,
                         "compression.type": "lz4"
-                    }
-                }
+                    },
+                )
             ]
         )
         #
