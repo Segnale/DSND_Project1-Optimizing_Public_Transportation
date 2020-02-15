@@ -15,7 +15,6 @@ class Station(Producer):
     """Defines a single station"""
 
     key_schema = avro.load(f"{Path(__file__).parents[0]}/schemas/arrival_key.json")
-
     #
     # DONE: Define this value schema in `schemas/station_value.json, then uncomment the below
     #
@@ -31,9 +30,7 @@ class Station(Producer):
             .replace("'", "")
         )
 
-        #
-        #
-        # TODO: Complete the below by deciding on a topic name, number of partitions, and number of
+        # DONE: Complete the below by deciding on a topic name, number of partitions, and number of
         # replicas
         #
         #
@@ -61,21 +58,32 @@ class Station(Producer):
         #
         # TODO: Complete this function by producing an arrival message to Kafka
         #
+        if prev_station_id is not None:
+            local_prev_station_id = prev_station_id
+        else:
+            local_prev_station_id = 000
+        if prev_direction is not None:
+            local_prev_direction = prev_direction
+        else:
+            local_prev_direction = "---"
+
         #
-        logger.info("arrival kafka integration incomplete - skipping")
-        self.producer(
+        logger.info(self.__str__())
+        self.producer.produce(
             topic=self.topic_name,
             key={"timestamp": self.time_millis()},
+            key_schema = self.key_schema,
             value={
-        #        # DONE: Configure this
-        #        #
+                # DONE: Configure this
+                #
                 "station_id": self.station_id,
-                "train_id": train,
+                "train_id": train.train_id,
                 "direction": direction,
-                "line": self.color,
-                "prev_station_id": prev_station_id,
-                "prev_direction": prev_direction
+                #"line": self.color,
+                "prev_station_id": local_prev_station_id,
+                "prev_direction": local_prev_direction
             },
+            value_schema = self.value_schema
         )
 
     def __str__(self):

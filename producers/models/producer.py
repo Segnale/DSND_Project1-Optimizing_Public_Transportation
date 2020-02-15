@@ -9,7 +9,7 @@ from confluent_kafka.avro import AvroProducer, CachedSchemaRegistryClient
 
 logger = logging.getLogger(__name__)
 
-SCHEMA_REGISTRY_URL = "http://localhost:8081/"
+SCHEMA_REGISTRY_URL = "http://localhost:8081"
 BROKER_URL = "PLAINTEXT://localhost:9092,PLAINTEXT://localhost:9093,PLAINTEXT://localhost:9094"
 
 class Producer:
@@ -48,11 +48,11 @@ class Producer:
             Producer.existing_topics.add(self.topic_name)
         
         # Schema Registry for Avro
-        schema_registry = CachedSchemaRegistryClient(SCHEMA_REGISTRY_URL)
+        schema_registry = CachedSchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
 
         # DONE: Configure the AvroProducer
         self.producer = AvroProducer(
-            {"bootstrap.servers": self.broker_properties["URL1"]},
+            {"bootstrap.servers": BROKER_URL},
             schema_registry = schema_registry
         )
 
@@ -63,30 +63,35 @@ class Producer:
         # DONE: Write code that creates the topic for this producer if it does not already exist on
         # the Kafka Broker.
         client = AdminClient({"bootstrap.servers": BROKER_URL})
-        features = client.create_topics(
-            [
-                NewTopic(
-                    topic = self.topic_name,
-                    num_partitions = self.num_partitions,
-                    replication_factor = self.num_replicas,
-                    config = {
-                        "cleanup.policy": "compact",
-                        "delete.retention.ms": 1000,
-                        "compression.type": "lz4"
-                    },
-                )
-            ]
-        )
-        #
-        # Logging the result of the topic creation
-        for topic, feature in features.items():
-            try:
-                # Succesful topic creation
-                feature.result()
-                logger.info(f"topic {self.topic_name} created")
-            except Exception as e:
-                # Failing topic creation
-                logger.info(f"failed to create topic {self.topic_name}: {e}")
+        exists = self.topic_exists(client)
+        if exists is False:
+            features = client.create_topics(
+                [
+                    NewTopic(
+                        topic = self.topic_name,
+                        num_partitions = self.num_partitions,
+                        replication_factor = self.num_replicas,
+                        config = {
+                            "cleanup.policy": "compact",
+                            "delete.retention.ms": 3000,
+                            "compression.type": "lz4"
+                        },
+                    )
+                ]
+            )
+            #
+            # Logging the result of the topic creation
+            for topic, feature in features.items():
+                try:
+                    # Succesful topic creation
+                    feature.result()
+                    logger.info(f"topic {self.topic_name} created")
+                except Exception as e:
+                    # Failing topic creation
+                    logger.info(f"failed to create topic {self.topic_name}: {e}")
+        else:
+            logger.info(f"topic {self.topic_name} has not been created because already existing")
+
 
 
     def close(self):
@@ -101,3 +106,8 @@ class Producer:
     def time_millis(self):
         """Use this function to get the key for Kafka Events"""
         return int(round(time.time() * 1000))
+    
+    def topic_exists(self, client):
+        """Checks if the given topic exists"""
+        topic_metadata = client.list_topics(timeout=5)
+        return self.topic_name in set(t.topic for t in iter(topic_metadata.topics.values()))

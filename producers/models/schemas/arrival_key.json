@@ -1,5 +1,5 @@
 {
-  "namespace": "il.sta",
+  "namespace": "il.cta",
   "type": "record",
   "name": "arrival.key",
   "fields": [

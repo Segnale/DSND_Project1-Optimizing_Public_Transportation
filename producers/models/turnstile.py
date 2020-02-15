@@ -1,6 +1,7 @@
-"""Creates a turnstile data producer"""
+""""Creates a turnstile data producer"""
 import logging
 from pathlib import Path
+from datetime import datetime
 
 from confluent_kafka import avro
 
@@ -15,8 +16,7 @@ class Turnstile(Producer):
     key_schema = avro.load(f"{Path(__file__).parents[0]}/schemas/turnstile_key.json")
 
     #
-    # TODO: Define this value schema in `schemas/turnstile_value.json, then uncomment the below
-    #
+    # DONE: Define this value schema in `schemas/turnstile_value.json, then uncomment the below
     value_schema = avro.load(f"{Path(__file__).parents[0]}/schemas/turnstile_value.json")
 
     def __init__(self, station):
@@ -33,8 +33,6 @@ class Turnstile(Producer):
         #
         # DONE: Complete the below by deciding on a topic name, number of partitions, and number of
         # replicas
-        #
-        #
         super().__init__(
             f"il.cta.{station_name}.turnstile", # DONE: Come up with a better topic name
             key_schema=Turnstile.key_schema,
@@ -48,25 +46,21 @@ class Turnstile(Producer):
     def run(self, timestamp, time_step):
         """Simulates riders entering through the turnstile."""
         num_entries = self.turnstile_hardware.get_entries(timestamp, time_step)
-        logger.info("turnstile kafka integration incomplete - skipping")
+        logger.info(f"turnstile of stations {self.station.station_id}-{self.station.name} get {num_entries} numbers of entries")
         #
         #
-        # TODO: Complete this function by emitting a message to the turnstile topic for the number
+        # DONE: Complete this function by emitting a message to the turnstile topic for the number
         # of entries that were calculated
-        #
-        #
-        Key = {
-            "timestamp": timestamp 
-        }
+        Key = {"timestamp": datetime.timestamp(timestamp)}
         Values = {
-            "station.id": self.station,
-            "station_name": self.station,
-            "line": ""
+            "station.id": self.station.station_id,
+            "station_name": self.station.name,
+            "entries": num_entries
         }
-        self.producer(
+        self.producer.produce(
             topic = self.topic_name,
             key = Key,
-            key_schema = key_schema,
+            key_schema = self.key_schema,
             value = Values,
-            value_schema = value_schema
+            value_schema = self.value_schema
         )
