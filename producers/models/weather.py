@@ -53,7 +53,6 @@ class Weather(Producer):
         if Weather.key_schema is None:
             with open(f"{Path(__file__).parents[0]}/schemas/weather_key.json") as f:
                 Weather.key_schema = json.load(f)
-
         #
         # DONE: Define this value schema in `schemas/weather_value.json
         if Weather.value_schema is None:
@@ -73,37 +72,36 @@ class Weather(Producer):
     def run(self, month):
         self._set_weather(month)
         #
-        # DONE: Complete the function by posting a weather event to REST Proxy. Make sure to
+        #
+        # TODO: Complete the function by posting a weather event to REST Proxy. Make sure to
         # specify the Avro schemas and verify that you are using the correct Content-Type header.
         logger.info(f"weather proxy - temperature: {self.temp} and {str(self.status)}")
+        keyDict = {"timestamp": self.time_millis()}
+        valueDict = {"temperature": self.temp, "status": str(self.status)}
         resp = requests.post(
             #
             # DONE: What URL should be POSTed to?
             f"{Weather.rest_proxy_url}/topics/{self.topic_name}",
             #
             # DONE: What Headers need to bet set?
-            headers={"Content-Type": "application/vnd/kafka.avro.v2+json"},
-            data=json.dumps(
+            headers = {"Content-Type": "application/vnd.kafka.json.v2+json"},
+            data = json.dumps(
                 {
-                    #
-                    # DONE: Provide key schema, value schema, and records
-                    "key_schema": Weather.key_schema,
-                    "value_schema": Weather.value_schema,
+                    #"key_schema": str(Weather.key_schema),
+                    "value_schema": str(Weather.value_schema),
                     "records": [
-                        {"key": {"timestamp": self.time_millis()}},
-                        {"value": [
-                            {"temperature": self.temp},
-                            {"status": str(self.status)}
-                         ]}
+                        {
+                            #"keys": keyDict,
+                            "value": valueDict
+                        }
                     ]
                 }
             ),
         )
-        try:
-            resp.raise_for_status()
-        except:
-            logger.info("Failed to send data through weather proxy")
-
+        #try:
+        resp.raise_for_status()
+        #except:
+        #    logger.info("Failed to send data through weather proxy")
         logger.debug(
             "sent weather data to kafka, temp: %s, status: %s",
             self.temp,

@@ -99,8 +99,6 @@ class Producer:
         #
         #
         # TODO: Write cleanup code for the Producer here
-        #
-        #
         logger.info("producer close incomplete - skipping")
 
     def time_millis(self):

@@ -1,4 +1,4 @@
-""""Creates a turnstile data producer"""
+"""Creates a turnstile data producer"""
 import logging
 from pathlib import Path
 from datetime import datetime
@@ -16,7 +16,8 @@ class Turnstile(Producer):
     key_schema = avro.load(f"{Path(__file__).parents[0]}/schemas/turnstile_key.json")
 
     #
-    # DONE: Define this value schema in `schemas/turnstile_value.json, then uncomment the below
+    # TODO: Define this value schema in `schemas/turnstile_value.json, then uncomment the below
+    #
     value_schema = avro.load(f"{Path(__file__).parents[0]}/schemas/turnstile_value.json")
 
     def __init__(self, station):
@@ -33,6 +34,8 @@ class Turnstile(Producer):
         #
         # DONE: Complete the below by deciding on a topic name, number of partitions, and number of
         # replicas
+        #
+        #
         super().__init__(
             f"il.cta.{station_name}.turnstile", # DONE: Come up with a better topic name
             key_schema=Turnstile.key_schema,
@@ -49,8 +52,10 @@ class Turnstile(Producer):
         logger.info(f"turnstile of stations {self.station.station_id}-{self.station.name} get {num_entries} numbers of entries")
         #
         #
-        # DONE: Complete this function by emitting a message to the turnstile topic for the number
+        # TODO: Complete this function by emitting a message to the turnstile topic for the number
         # of entries that were calculated
+        #
+        #
         Key = {"timestamp": datetime.timestamp(timestamp)}
         Values = {
             "station.id": self.station.station_id,

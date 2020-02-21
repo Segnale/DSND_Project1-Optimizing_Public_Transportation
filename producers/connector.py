@@ -20,12 +20,12 @@ def configure_connector():
         logging.debug("connector already created skipping recreation")
         return
 
-    # DONE: Complete the Kafka Connect Config below.
+    # TODO: Complete the Kafka Connect Config below.
     # Directions: Use the JDBC Source Connector to connect to Postgres. Load the `stations` table
     # using incrementing mode, with `stop_id` as the incrementing column name.
     # Make sure to think about what an appropriate topic prefix would be, and how frequently Kafka
     # Connect should run this connector (hint: not very often!)
-    logger.info("connector code not completed skipping connector creation")
+    logging.info("attempt to create jdbc connector")
     resp = requests.post(
         KAFKA_CONNECT_URL,
         headers={"Content-Type": "application/json"},
@@ -38,30 +38,34 @@ def configure_connector():
                 "value.converter": "org.apache.kafka.connect.json.JsonConverter",
                 "value.converter.schemas.enable": "false",
                 "batch.max.rows": "500",
-                # DONE
+    #            # DONE
                 "connection.url": "jdbc:postgresql://localhost:5432/cta",
-                # DONE
+    #            # DONE
                 "connection.user": "cta_admin",
-                # DONE
+    #            # DONE
                 "connection.password": "chicago",
-                # DONE
+    #            # DONE
                 "table.whitelist": "stations",
-                # DONE
+    #            # DONE
                 "mode": "incrementing",
-                # DONE
+    #            # DONE
                 "incrementing.column.name": "stop_id",
-                # DONE
-                "topic.prefix": "station_info-",
-                # DONE
-                "poll.interval.ms": "10000",
+    #            # DONE
+                "topic.prefix": "il.cta.station.",
+    #            # DONE
+                "poll.interval.ms": "30000",
             }
         }),
     )
 
     ## Ensure a healthy response was given
-    resp.raise_for_status()
+    try:
+        resp.raise_for_status()
+    except:
+        logger.info("Failed to create the jdbc connector")
+        
     logging.debug("connector created successfully")
-
+    logging.info("connector jdbc created")
 
 if __name__ == "__main__":
     configure_connector()
