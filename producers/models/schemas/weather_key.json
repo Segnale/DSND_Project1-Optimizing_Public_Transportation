@@ -5,7 +5,7 @@
   "fields": [
     {
       "name": "timestamp",
-      "type": "int"
+      "type": "long"
     }
   ]
 }

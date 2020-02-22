@@ -76,6 +76,7 @@ class Weather(Producer):
         # TODO: Complete the function by posting a weather event to REST Proxy. Make sure to
         # specify the Avro schemas and verify that you are using the correct Content-Type header.
         logger.info(f"weather proxy - temperature: {self.temp} and {str(self.status)}")
+        headers = {"Content-Type": "application/vnd.kafka.avro.v2+json"}
         keyDict = {"timestamp": self.time_millis()}
         valueDict = {"temperature": self.temp, "status": str(self.status)}
         resp = requests.post(
@@ -84,11 +85,11 @@ class Weather(Producer):
             f"{Weather.rest_proxy_url}/topics/{self.topic_name}",
             #
             # DONE: What Headers need to bet set?
-            headers = {"Content-Type": "application/vnd.kafka.json.v2+json"},
+            headers = headers,
             data = json.dumps(
                 {
-                    #"key_schema": str(Weather.key_schema),
-                    "value_schema": str(Weather.value_schema),
+                    #"key_schema": json.dumps(Weather.key_schema),
+                    "value_schema": json.dumps(Weather.value_schema),
                     "records": [
                         {
                             #"keys": keyDict,
