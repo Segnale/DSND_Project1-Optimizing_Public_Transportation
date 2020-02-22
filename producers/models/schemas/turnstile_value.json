@@ -1,10 +1,9 @@
 {
   "namespace": "il.cta",
   "type": "record",
-  "name": "turnstile.value",
+  "name": "weather.value",
   "fields": [
-    {"name": "station_id", "type": "int", "default": 0},
-    {"name": "station_name", "type": "string"},
-    {"name": "entries", "type": "int"}
+    {"name": "temperature", "type": "float"},
+    {"name": "status", "type": "string"}
   ]
 }
