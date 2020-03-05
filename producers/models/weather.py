@@ -78,7 +78,7 @@ class Weather(Producer):
         logger.info(f"weather proxy - temperature: {self.temp} and {str(self.status)}")
         headers = {"Content-Type": "application/vnd.kafka.avro.v2+json"}
         keyDict = {"timestamp": self.time_millis()}
-        valueDict = {"temperature": self.temp, "status": str(self.status)}
+        valueDict = {"temperature": self.temp, "status": self.status.name}
         resp = requests.post(
             #
             # DONE: What URL should be POSTed to?
@@ -88,21 +88,22 @@ class Weather(Producer):
             headers = headers,
             data = json.dumps(
                 {
-                    #"key_schema": json.dumps(Weather.key_schema),
+                    "key_schema": json.dumps(Weather.key_schema),
                     "value_schema": json.dumps(Weather.value_schema),
                     "records": [
                         {
-                            #"keys": keyDict,
+                            "key": keyDict,
                             "value": valueDict
-                        }
+                        },
                     ]
                 }
             ),
         )
-        #try:
-        resp.raise_for_status()
-        #except:
-        #    logger.info("Failed to send data through weather proxy")
+        try:
+            resp.raise_for_status()
+        except:
+            logger.info("Failed to send data through weather proxy")
+            
         logger.debug(
             "sent weather data to kafka, temp: %s, status: %s",
             self.temp,
