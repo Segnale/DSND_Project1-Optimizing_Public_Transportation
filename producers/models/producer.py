@@ -32,28 +32,29 @@ class Producer:
         self.value_schema = value_schema
         self.num_partitions = num_partitions
         self.num_replicas = num_replicas
+        
+        # Schema Registry for Avro
+        schema_registry = CachedSchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
+
         #
         #
         # TODO: Configure the broker properties below. Make sure to reference the project README
         # and use the Host URL for Kafka and Schema Registry!
         self.broker_properties = {
-            "URL1": "PLAINTEXT://localhost:9092",
-            "URL2": "PLAINTEXT://localhost:9093",
-            "URL3": "PLAINTEXT://localhost:9094"
+            "bootstrap.servers": BROKER_URL
         }
         
         # If the topic does not already exist, try to create it
         if self.topic_name not in Producer.existing_topics:
             self.create_topic()
             Producer.existing_topics.add(self.topic_name)
-        
-        # Schema Registry for Avro
-        schema_registry = CachedSchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
 
         # DONE: Configure the AvroProducer
         self.producer = AvroProducer(
-            {"bootstrap.servers": BROKER_URL},
-            schema_registry = schema_registry
+            self.broker_properties,
+            schema_registry = schema_registry,
+            default_key_schema=key_schema,
+            default_value_schema=value_schema,
         )
 
     def create_topic(self):
@@ -99,7 +100,8 @@ class Producer:
         #
         #
         # TODO: Write cleanup code for the Producer here
-        logger.info("producer close incomplete - skipping")
+        self.producer.flush()
+        logger.info(f"producer of topic {self.topic_name} is cleaned")
 
     def time_millis(self):
         """Use this function to get the key for Kafka Events"""

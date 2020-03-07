@@ -39,17 +39,15 @@ topic = app.topic("il.cta.station.stations", value_type=Station)
 # DONE: Define the output Kafka Topic
 out_topic = app.topic("il.cta.station.transformedstations", value_type=TransformedStation, partitions=1)
 # TODO: Define a Faust Table
-table = app.Table(
+station_table = app.Table(
     "stations_table",
     default=str,
     partitions=1,
     changelog_topic=out_topic,
 )
-
-
 #
 #
-# TODO: Using Faust, transform input `Station` records into `TransformedStation` records. Note that
+# DONE: Using Faust, transform input `Station` records into `TransformedStation` records. Note that
 # "line" is the color of the station. So if the `Station` record has the field `red` set to true,
 # then you would set the `line` of the `TransformedStation` record to the string `"red"`
 @app.agent(topic)
@@ -65,13 +63,13 @@ async def Station_Transformation(stations):
         else:
             line = "none"
         
-        T_Station = TransformedStation(
+        station_table[station.station_id] = TransformedStation(
             station_id = station.station_id,
             station_name = station.station_name,
             order = station.order,
             line = line)
             
-        await out_topic.send(value=T_Station)
+        await out_topic.send(value=station_table[station.station_id])
 
 
 if __name__ == "__main__":
